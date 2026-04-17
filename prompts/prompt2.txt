@@ -1,2 +1,169 @@
 please generate the exact commands to start building the backend for this project 
 explain project dependencies as you go
+
+response: 
+The user wants to start building the backend for their weather app. They want exact commands and explanations of dependencies as they go. Let me first understand what's in the project directory currently.
+
+Let me see what's already in the project.
+
+Bash Explore full project structure
+IN
+ls -la /Users/isaachennessey/weather/ && find /Users/isaachennessey/weather -maxdepth 3 -not -path "*/node_modules/*" -not -path "*/.git/*" | sort
+
+OUT
+total 16
+drwxr-xr-x    3 isaachennessey  staff    96 Apr 17 15:42 .
+drwxr-x--x+ 125 isaachennessey  staff  4000 Apr 17 15:42 ..
+-rw-r--r--@   1 isaachennessey  staff  6151 Apr 17 15:42 CLAUDE.md
+/Users/isaachennessey/weather
+/Users/isaachennessey/weather/CLAUDE.md
+The project is completely empty (just the CLAUDE.md we wrote). The user needs to create the Next.js project from scratch. Let me give them the exact commands to:
+
+Create a Next.js app with the right options
+Install dependencies (TanStack Query, shadcn/ui, etc.)
+Set up the project structure for the weather app backend
+Since this is a weather app, the backend will likely need:
+
+A weather API integration (OpenWeatherMap, WeatherAPI, etc.)
+
+Server functions for fetching weather data
+
+Environment variables for API keys
+
+Let me give them the exact commands with explanations.
+
+Completely greenfield. Here are the exact commands in order, with explanations for every dependency choice:
+
+Step 1 — Scaffold the Next.js app
+
+cd /Users/isaachennessey/weather
+npx create-next-app@latest weatherapp \
+  --typescript \
+  --tailwind \
+  --eslint \
+  --app \
+  --src-dir \
+  --import-alias "@/*" \
+  --turbopack
+Flags explained:
+
+--app — App Router (required for Server Functions and 'use server')
+--src-dir — puts everything under src/ so the root stays clean
+--import-alias "@/*" — lets you write @/lib/... instead of ../../lib/...
+--turbopack — Next's fast Rust-based bundler, now stable
+Step 2 — Install TanStack Query
+
+cd weatherapp
+npm install @tanstack/react-query @tanstack/react-query-devtools
+Why both:
+
+@tanstack/react-query — the core library (hooks, cache, query client)
+@tanstack/react-query-devtools — browser panel showing cache state, stale times, refetch counts. Dev only, tree-shaken in production automatically.
+Step 3 — Install shadcn/ui
+
+npx shadcn@latest init
+It will ask you a few questions — pick these:
+
+Style: Default
+Base color: your choice (New York looks good)
+CSS variables: Yes
+Then add the components you'll need for a weather app:
+
+
+npx shadcn@latest add card button input skeleton badge separator
+Why these specifically:
+
+card — weather panels
+button — search, refresh actions
+input — city search
+skeleton — loading states (replaces spinners, much better UX)
+badge — weather condition tags
+separator — layout dividers
+Step 4 — Install a weather API client + environment types
+
+npm install zod
+Why zod: You'll be validating data coming back from the weather API inside server functions. External API responses are untyped at runtime — Zod parses and validates them so TypeScript types are guaranteed accurate, not just assumed.
+
+Step 5 — Create the .env.local file
+
+touch .env.local
+Then open it and add:
+
+
+WEATHER_API_KEY=your_key_here
+WEATHER_API_BASE_URL=https://api.openweathermap.org/data/2.5
+Sign up for a free key at openweathermap.org. The free tier covers current weather + 5-day forecast.
+
+Why env vars and not hardcoding: Server functions run on the server so process.env.WEATHER_API_KEY is never exposed to the browser. Never prefix weather API keys with NEXT_PUBLIC_ — that ships them to the client bundle.
+
+Step 6 — Set up the TanStack Query provider
+This is the one piece of wiring that needs to happen before any useQuery call works. Create:
+
+src/providers/query-provider.tsx
+
+
+'use client'
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { useState } from 'react'
+
+export function QueryProvider({ children }: { children: React.ReactNode }) {
+  const [client] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 5 * 60 * 1000,  // 5 min default — override per query
+        retry: 1,
+      },
+    },
+  }))
+
+  return (
+    <QueryClientProvider client={client}>
+      {children}
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  )
+}
+Then wrap it in src/app/layout.tsx:
+
+
+import { QueryProvider } from '@/providers/query-provider'
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <QueryProvider>{children}</QueryProvider>
+      </body>
+    </html>
+  )
+}
+Why useState(() => new QueryClient(...)): Creates the client once per component mount. If you write const client = new QueryClient() at module level, it gets shared across server renders in Next.js, which leaks cache between users.
+
+Step 7 — Create the server actions directory
+
+mkdir -p src/actions src/lib
+touch src/actions/weather.ts
+touch src/lib/weather-api.ts
+src/lib/weather-api.ts — raw API calls, no 'use server', just typed fetch wrappers
+
+src/actions/weather.ts — the 'use server' layer that calls lib/, validates with Zod, and returns safe typed data to the client
+
+This separation keeps the server actions thin and the API logic testable in isolation.
+
+After all commands, your structure will look like:
+
+src/
+  app/
+    layout.tsx        ← QueryProvider lives here
+    page.tsx
+  actions/
+    weather.ts        ← 'use server' functions
+  lib/
+    weather-api.ts    ← raw fetch helpers
+  providers/
+    query-provider.tsx
+  components/         ← shadcn components land here automatically
+    ui/
+What to do first after setup: Build out src/lib/weather-api.ts and src/actions/weather.ts — that's the entire backend. Once those exist, the client just calls them through useQuery. Ready to write those files when you are.
