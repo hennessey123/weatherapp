@@ -1,0 +1,1 @@
+ok so lets under that build a singple time weather disoplay for the current selcected are (make the default cuty portland or

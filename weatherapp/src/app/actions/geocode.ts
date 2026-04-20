@@ -128,7 +128,7 @@ async function queryTigerLayer(
     const a = f.attributes
     const state = FIPS_TO_STATE[a.STATE] ?? a.STATE
     return {
-      matchedAddress: `${a.NAME}, ${state}`,
+      matchedAddress: `${a.BASENAME}, ${state}`,
       lat: parseFloat(a.CENTLAT),
       lon: parseFloat(a.CENTLON),
       area: parseFloat(a.AREALAND) || 0,
@@ -137,7 +137,87 @@ async function queryTigerLayer(
   })
 }
 
+async function placeAtPoint(
+  lat: number,
+  lon: number,
+): Promise<string | null> {
+  // Try Incorporated Places (layer 4), fall back to Census Designated Places (layer 5).
+  for (const layer of [4, 5] as const) {
+    const url = new URL(
+      `https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/Places_CouSub_ConCity_SubMCD/MapServer/${layer}/query`,
+    )
+    url.searchParams.set('geometry', `${lon},${lat}`)
+    url.searchParams.set('geometryType', 'esriGeometryPoint')
+    url.searchParams.set('inSR', '4326')
+    url.searchParams.set('spatialRel', 'esriSpatialRelIntersects')
+    url.searchParams.set('outFields', 'BASENAME,STATE')
+    url.searchParams.set('returnGeometry', 'false')
+    url.searchParams.set('f', 'json')
+
+    const res = await fetch(url, { cache: 'no-store' })
+    if (!res.ok) continue
+    const data = (await res.json()) as {
+      features?: Array<{ attributes: { BASENAME: string; STATE: string } }>
+    }
+    const hit = data.features?.[0]
+    if (hit) {
+      const state = FIPS_TO_STATE[hit.attributes.STATE] ?? hit.attributes.STATE
+      return `${hit.attributes.BASENAME}, ${state}`
+    }
+  }
+  return null
+}
+
+async function searchZip(zipPrefix: string): Promise<GeocodeMatch[]> {
+  const url = new URL(
+    'https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/PUMA_TAD_TAZ_UGA_ZCTA/MapServer/1/query',
+  )
+  const where =
+    zipPrefix.length === 5
+      ? `BASENAME='${zipPrefix}'`
+      : `BASENAME LIKE '${zipPrefix}%'`
+  url.searchParams.set('where', where)
+  url.searchParams.set('outFields', 'BASENAME,CENTLAT,CENTLON')
+  url.searchParams.set('returnGeometry', 'false')
+  url.searchParams.set('f', 'json')
+  url.searchParams.set('resultRecordCount', '8')
+  url.searchParams.set('orderByFields', 'BASENAME')
+
+  const res = await fetch(url, { cache: 'no-store' })
+  if (!res.ok) return []
+
+  const data = (await res.json()) as {
+    features?: Array<{
+      attributes: { BASENAME: string; CENTLAT: string; CENTLON: string }
+    }>
+  }
+  const zips = (data.features ?? []).map((f) => ({
+    zip: f.attributes.BASENAME,
+    lat: parseFloat(f.attributes.CENTLAT),
+    lon: parseFloat(f.attributes.CENTLON),
+  }))
+
+  const enriched = await Promise.all(
+    zips.map(async (z) => {
+      const place = await placeAtPoint(z.lat, z.lon)
+      return {
+        matchedAddress: place ? `${place} (${z.zip})` : `ZIP ${z.zip}`,
+        lat: z.lat,
+        lon: z.lon,
+      }
+    }),
+  )
+  return enriched
+}
+
 export async function searchLocations(query: string): Promise<GeocodeMatch[]> {
+  const trimmed = query.trim()
+
+  // ZIP code path: 3-5 digits
+  if (/^\d{3,5}$/.test(trimmed)) {
+    return searchZip(trimmed)
+  }
+
   const { city, stateFips } = parseQuery(query)
   if (city.length < 2) return []
 

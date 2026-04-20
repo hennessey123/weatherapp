@@ -1,0 +1,1 @@
+generate a file for each prinpt Ive given you and pout it in the prompts folder

@@ -48,7 +48,7 @@ export function LocationSearch({
           }}
           onFocus={() => setOpen(true)}
           onBlur={() => setTimeout(() => setOpen(false), 150)}
-          placeholder="Search a US city…"
+          placeholder="Search a US city or ZIP…"
           className="pl-9 pr-9 h-11"
         />
       </div>

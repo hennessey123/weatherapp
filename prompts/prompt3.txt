@@ -1,0 +1,1 @@
+we want to build a weather app with a search interface using the weather srervie apis (which you cna research) lets start with an autocoempleting search br
