@@ -1,1 +1,7 @@
+PROMPT:
 all searches are coming back empts
+
+RESPONSE:
+Root cause: Census 'locations/onelineaddress' only matches full street addresses — "Boston, MA" alone returns addressMatches: []. Verified by hitting the endpoint directly.
+
+Fix: swapped to Census TIGERweb Places (ArcGIS REST service, layers 4 + 5 = Incorporated Places + Census Designated Places) which does prefix-match city-name search. Mapped FIPS state codes → USPS abbreviations. Dropped min query length to 2 chars. Now "Bos", "New Y", "Chic" all return results.

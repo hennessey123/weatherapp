@@ -1,1 +1,10 @@
+PROMPT:
 we want to build a weather app with a search interface using the weather srervie apis (which you cna research) lets start with an autocoempleting search br
+
+RESPONSE:
+Proposed Open-Meteo (free, no API key, built-in geocoding autocomplete). Plan:
+1) Add TanStack Query + shadcn (input, command, popover)
+2) Query provider in root layout
+3) Server action searchLocations(q) hitting the geocoding endpoint
+4) Client LocationSearch — debounced useQuery, shadcn Command list
+Started installing deps — user interrupted before shadcn init completed.

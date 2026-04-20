@@ -1,1 +1,10 @@
+PROMPT:
 lets make it search zipcode (also put all my prompts in to files)
+
+RESPONSE:
+Added ZIP search path in searchLocations:
+- 3-5 digit input routes to a separate TIGERweb ZCTA query (layer 1 of PUMA_TAD_TAZ_UGA_ZCTA)
+- 5 digits does exact BASENAME match; 3-4 digits prefix-matches (useful while typing)
+- Returns centroid lat/lon that feeds straight into the NWS forecast
+- Regex gate means ZIP lookup never blocks the city search path
+- Placeholder updated to "Search a US city or ZIP…"

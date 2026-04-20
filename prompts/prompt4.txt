@@ -1,1 +1,16 @@
+PROMPT:
 use the goverment APIs like I todl you to
+
+RESPONSE:
+Switched to US government APIs:
+- Forecasts: api.weather.gov (NWS) — lat/lon → /points → gridpoint forecast
+- Geocoding: geocoding.geo.census.gov (US Census Geocoder)
+Saved this preference to memory so future sessions default to gov APIs.
+
+Built out:
+- src/app/actions/geocode.ts — 'use server' calling Census onelineaddress
+- src/components/location-search.tsx — shadcn Input + Command, debounced useQuery (300ms, 5-min staleTime)
+- src/app/providers.tsx — TanStack Query provider
+- src/hooks/use-debounced-value.ts — the one useEffect in the app, commented with the justification per CLAUDE.md
+
+Build passed. Next step: wire selected coords into NWS forecast.

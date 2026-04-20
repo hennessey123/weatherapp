@@ -1,1 +1,5 @@
+PROMPT:
 generate a file for each prinpt Ive given you and pout it in the prompts folder
+
+RESPONSE:
+Wrote prompts/prompt3.txt through prompt12.txt — one per prompt from this session, starting at 3 since prompt1.txt and prompt2.txt already existed. (Later expanded to prompt15, then rewritten with responses included.)

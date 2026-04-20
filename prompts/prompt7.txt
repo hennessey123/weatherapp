@@ -1,1 +1,12 @@
+PROMPT:
 ok so lets under that build a singple time weather disoplay for the current selcected are (make the default cuty portland or
+
+RESPONSE:
+Added:
+- src/app/actions/weather.ts — getForecast(lat, lon): /points/{lat,lon} → forecast URL → periods[]
+- src/components/weather-display.tsx — client card, useQuery with 10-min staleTime, shows current period (name, temp, icon, short forecast, wind)
+- src/components/weather-app.tsx — client wrapper owning the selected location state; wires LocationSearch onSelect → WeatherDisplay
+- page.tsx reduced to rendering <WeatherApp />
+- Default location: Portland, OR (45.5152, -122.6784)
+
+Had to rename an earlier prop to satisfy Next.js 16's strict serializable-props check across client/server boundaries.

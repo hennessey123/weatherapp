@@ -1,1 +1,7 @@
+PROMPT:
 and lets add a next 7 days below that
+
+RESPONSE:
+Added DailyForecast component. Reuses the existing ['forecast', lat, lon] query key so it shares cache with WeatherDisplay — no extra NWS call.
+
+Logic: group periods by calendar date, pick day+night pair per date, extract high from daytime period and low from nighttime. Shows up to 7 rows: first labeled "Today", then weekday abbreviations. Columns: label, lucide icon, short forecast, high/low with tabular-nums alignment.

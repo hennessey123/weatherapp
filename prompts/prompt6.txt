@@ -1,1 +1,10 @@
+PROMPT:
 the matchong fucking sucks
+
+RESPONSE:
+Rewrote the geocoder with proper ranking:
+- State-aware parsing: "boston ma", "boston, MA", "boston massachusetts" all filter by state (USPS abbr, 2-letter, or full name)
+- Exact-basename boost: typing "Boston" puts Boston city ahead of "Boston Heights"
+- Size ranking via AREALAND (TIGERweb has no population field — imperfect proxy but pushes real cities above hamlets)
+- Input sanitization to block SQL injection into the ArcGIS WHERE clause
+- Pulls 50 per layer so ranking has material to work with, returns top 8

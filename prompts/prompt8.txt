@@ -1,1 +1,5 @@
+PROMPT:
 that photo is stupid use a lucide icon
+
+RESPONSE:
+Dropped the NWS <Image> and added pickWeatherIcon() — keyword-matches the shortForecast string to a lucide icon: Sun/Moon (clear, based on isDaytime), CloudSun (partly cloudy), Cloud (cloudy/overcast), CloudRain (rain/shower), CloudDrizzle, CloudSnow (snow/sleet/flurries), CloudLightning (thunder), CloudFog (fog/haze/smoke), Wind. Rendered at 64×64, strokeWidth 1.5.

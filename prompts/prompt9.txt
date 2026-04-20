@@ -1,1 +1,11 @@
+PROMPT:
 under that lets put an hourly forcast for the next 24 hours
+
+RESPONSE:
+Added:
+- getHourlyForecast(lat, lon) server action — /points → forecastHourly URL, returns first 24 periods
+- Extracted points lookup into a shared getForecastUrls helper so both daily and hourly reuse it
+- Moved pickWeatherIcon into src/lib/weather-icon.ts so both displays share it
+- HourlyForecast component — horizontally scrollable row of hour cells: hour label, icon, temp, precip % (shown when ≥10%)
+
+Note: /points is called twice per location (once per query) but NWS caches it heavily and each is a separate TanStack Query with 10-min staleTime.

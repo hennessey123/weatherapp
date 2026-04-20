@@ -1,1 +1,7 @@
+PROMPT:
 make it show the ciry name of the zip code
+
+RESPONSE:
+Added placeAtPoint(lat, lon) — reverse point-in-polygon lookup against Incorporated Places (layer 4), falls back to Census Designated Places (layer 5). Uses ArcGIS spatialRel=esriSpatialRelIntersects with the ZCTA centroid.
+
+Label format: "Portland, OR (97205)". Falls back to "ZIP 97205" if the centroid lands in unincorporated area. Enrichment runs in parallel across all ZIP matches via Promise.all.

@@ -1,1 +1,5 @@
+PROMPT:
 all cities say "city" after lets like not do that it look dumb
+
+RESPONSE:
+Swapped NAME → BASENAME in both the city search and the ZIP reverse lookup. Census's NAME field includes the LSAD (Legal/Statistical Area Description) suffix — "Portland city", "Boston town", "Boston Heights village". BASENAME is the bare name without it. Now results read "Portland, OR" and "Portland, OR (97205)".

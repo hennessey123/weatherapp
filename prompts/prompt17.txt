@@ -1,0 +1,5 @@
+PROMPT:
+so i exported your convo incldue your repsonses in the prompt files
+
+RESPONSE:
+Rewrote prompt3.txt through prompt17.txt in "PROMPT: / RESPONSE:" format, with a concise summary of my response alongside each user prompt. prompt1.txt and prompt2.txt untouched (predated this session).
