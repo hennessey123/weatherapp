@@ -1,0 +1,41 @@
+what other tests should i define
+
+Claude
+Based on what's already covered, here are the gaps worth filling:
+
+Here's what's worth testing next, grouped by value:
+
+High value — pure logic, easy to test
+1. Result ranking in searchLocations
+
+Exact city name match ranks before partial ("Austin" beats "Austintown")
+Larger area ranks before smaller when both are partial matches
+2. Deduplication
+
+Same city returned from both layer 4 and layer 5 appears only once in results
+3. Result limit
+
+searchLocations never returns more than 8 results
+4. Apostrophes in city names
+
+"O'Brien" and "Coeur d'Alene" — the sanitize() allows apostrophes but safeCity escapes them as '' for SQL. Worth verifying the WHERE clause comes out as BASENAME LIKE 'O''Brien%'
+Medium value — weather.ts server function
+5. NWS points URL format
+
+getForecastUrls(40.7128, -74.0060) → URL contains 40.7128,-74.0060 (4 decimal places, not more)
+Verify lat/lon are formatted with .toFixed(4) exactly
+6. Hourly forecast is capped at 24 periods
+
+Even if NWS returns 156 periods, getHourlyForecast slices to 24
+7. NWS error propagates
+
+Non-ok response throws Error with status code in message
+Medium value — useDebouncedValue hook
+8. Value updates after delay
+
+Returns initial value immediately, then updated value after delayMs
+Clears timer on rapid updates (only last value commits)
+Lower value — already partially covered
+ZIP prefix with leading zeros ("02101") — already covered
+City with no state returns results from both states — already covered
+The ranking + deduplication + NWS URL format tests would give you the most coverage for the least effort. Want me to write any of these?
