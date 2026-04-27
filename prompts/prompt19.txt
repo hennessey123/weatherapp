@@ -1,0 +1,29 @@
+Test that geocoding API calls target the correct geographic layers and pass parameters with precision
+
+## Specific test cases for geocode.location-accuracy.test.ts
+
+### 1. ZIP code WHERE clause construction
+- Exact 5-digit ZIP → generates `BASENAME='XXXXX'` (exact match)
+- ZIP prefix (3–4 digits) → generates `BASENAME LIKE 'XXX%'` (prefix match)
+- Leading zeros preserved in all cases (e.g., ZIP 02101 stays `'02101'`)
+
+### 2. Coordinate passthrough to reverse lookup
+- ZCTA centroid lat/lon extracted and passed verbatim to `geometry` param
+- No rounding, no defaults, no coordinate transformation
+- Test across: 3 individual ZIPs + 1 multi-ZIP prefix (4 scenarios total)
+
+### 3. Known ZIP to label mapping
+- 8 well-known ZIPs (10001 NY, 90210 CA, 60601 IL, 78701 TX, 02101 MA, 98101 WA, 30301 GA, 77001 TX)
+- Verify final label format: `"City, ST (ZIP)"`
+- Confirm coordinates match ZCTA source data
+
+### 4. City + state FIPS code routing
+- 13 query format variations: "Austin, TX" | "Portland OR" | "Portland, Oregon" | "Salem West Virginia" etc.
+- Each must produce the correct FIPS code in the `STATE=` clause
+- Bare city (no state) clause → no STATE= param included
+
+### 5. placeAtPoint layer priority
+- **Try first**: Layer 4 (Incorporated Places)
+- **Fallback**: Layer 5 (CDPs) only if layer 4 returns empty
+- **Last resort**: Both empty → fallback label `"ZIP XXXXX"`
+>>>>>>> 8a55085 (Rewrite geocoding test prompt for clarity)

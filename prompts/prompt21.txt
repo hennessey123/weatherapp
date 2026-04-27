@@ -1,0 +1,23 @@
+create tests to prioritize larger cities first, then summarize all tests and put in claude.md
+
+Claude
+Let me read the existing tests to match the patterns before writing new ones.
+
+Now I have a clear picture of the sorting logic and test patterns. Let me write the ranking tests.
+
+All 55 tests pass. Now let me update CLAUDE.md.
+
+CLAUDE.md
+All done. Here's what was added:
+
+10 new ranking tests in geocode.ranking.test.ts across 4 suites:
+
+Exact match before partial — 3 tests (e.g. "Austin" beats larger-area "Austintown")
+Larger area first within same group — 3 tests (e.g. Portland OR 145M m² before Portland ME 15M m²)
+Result cap at 8 — 2 tests
+Deduplication — 2 tests (same city from both layers collapses to one; same name in different states stays separate)
+CLAUDE.md updated with a full test section (section 7) covering:
+
+All 3 test files and their test counts (55 total)
+What each suite verifies
+Key gotchas (trailing zeros in floats, layer fallback call counts, vi.importActual pattern)

@@ -1,0 +1,38 @@
+Write small test cases to verify location search functionality, starting with ZIP code searches
+
+Created comprehensive test suite with 55 passing tests across 3 files, all runnable via `npm test` (Vitest).
+
+**Test architecture:**
+- Vitest (Node.js environment) with TypeScript strict mode
+- Fetch mocking via `vi.fn()` — no real API calls
+- `vitest.config.ts` wires `@/*` path alias matching `tsconfig.json`
+- All `'use server'` files loaded via `vi.importActual` — no directive stripping needed
+
+**Suite 1: geocode.test.ts — routing & sanitization (10 tests)**
+- ZIP detection: 5-digit routes to ZCTA layer; city names do not
+- Prefix handling: 3-4 digit inputs use `LIKE` wildcard; 5-digit uses exact equality
+- Reverse lookup: succeeds → enriches label; fails → `"ZIP XXXXX"` fallback
+- Error paths: failed fetch returns `[]`; empty/1-char queries skip network entirely
+- SQL injection: payload `'; DROP TABLE places; --` is sanitized before WHERE clause
+
+**Suite 2: geocode.location-accuracy.test.ts — API precision (35 tests)**
+- WHERE clause construction: exact FIPS codes, exact basenames, wildcard patterns
+- Coordinate passthrough: ZCTA centroid → geometry param, byte-for-byte accuracy
+- End-to-end: 8 known ZIPs verify final label format `"City, ST (ZIP)"` and coordinates
+- Location parsing: 13 city+state format variants (comma form, trailing abbr, full state names) each resolve to correct FIPS code
+- Layer fallback: placeAtPoint tries layer 4 (Incorporated Places) then layer 5 (CDPs), never tries 5 if 4 succeeds
+
+**Suite 3: geocode.ranking.test.ts — result sorting (10 tests)**
+- Exact-match priority: `"Austin"` exact always ranks before `"Austintown"` partial, regardless of area
+- Within-group sorting: larger `AREALAND` ranks first in both exact and partial groups
+- Result cap: max 8 results returned; fewer when fewer available
+- Deduplication: same city from layers 4+5 appears once; same name across states appears separately
+
+**Running & debugging:**
+```bash
+npm test              # all tests
+npm test -- --ui     # watch mode with browser UI
+npm test geocode     # filter by file pattern
+```
+
+All tests passing (55/55) establishes a baseline for future development and catches regressions in geocoding, API parameter construction, and result ranking.
